@@ -24,6 +24,10 @@ jobs:
           key: ${{ matrix.os }}-rubygems-${{ steps.set-up-homebrew.outputs.gems-hash }}
           restore-keys: ${{ matrix.os }}-rubygems-
 
+      - name: Install Homebrew Bundler RubyGems
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: brew install-bundler-gems
+
       - run: brew install git-lfs && git lfs install && sudo ln -s "$(which git-lfs)" "$(git --exec-path)/git-lfs"
 
       - run: brew install --build-bottle jank && brew test jank && file "$(brew --prefix)/bin/jank"
