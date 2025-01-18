@@ -31,13 +31,12 @@ jobs:
       - run: brew test-bot --only-setup
 
       - run: brew test-bot --only-tap-syntax
-
+      
       - run: brew install git-lfs && git lfs install && sudo git lfs install --system && sudo ln -s "$(which git-lfs)" "$(git --exec-path)/git-lfs" && brew link git-lfs
 
       - run: |
           cd ~/Library/Caches/Homebrew/jank--git/
           git lfs install --local
-          brew test-bot --only-formulae --only-json-tab --skip-recursive-dependents --root-url="https://ghcr.io/v2/elken/jank"
         if: github.event_name == 'pull_request'
 
       - name: Upload bottles as artifact
