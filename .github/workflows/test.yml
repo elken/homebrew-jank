@@ -24,9 +24,7 @@ jobs:
           key: ${{ matrix.os }}-rubygems-${{ steps.set-up-homebrew.outputs.gems-hash }}
           restore-keys: ${{ matrix.os }}-rubygems-
 
-      - run: brew install git-lfs && git lfs install && sudo ln -s "$(which git-lfs)" "$(git --exec-path)/git-lfs" && sudo ln -s "$(which git-lfs)" "$(brew --prefix)/bin/git-lfs"
-
-      - run: brew install --build-bottle jank && brew test jank && file "$(brew --prefix)/bin/jank"
+      # - run: brew install --build-bottle jank && brew test jank && file "$(brew --prefix)/bin/jank"
 
       - run: brew test-bot --only-cleanup-before
 
@@ -34,7 +32,11 @@ jobs:
 
       - run: brew test-bot --only-tap-syntax
 
+      - run: brew install git-lfs && git lfs install && sudo git lfs install --system && sudo ln -s "$(which git-lfs)" "$(git --exec-path)/git-lfs" && brew link git-lfs
+
       - run: |
+          cd ~/Library/Caches/Homebrew/jank--git/
+          git lfs install --local
           brew test-bot --only-formulae --only-json-tab --skip-recursive-dependents --root-url="https://ghcr.io/v2/elken/jank"
         if: github.event_name == 'pull_request'
 

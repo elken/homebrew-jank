@@ -21,7 +21,6 @@ class Jank < Formula
     ENV.append "LDFLAGS", "-Wl,-rpath,#{Formula["llvm@19"].opt_lib}"
 
     ENV.append "CPPFLAGS", "-L#{Formula["llvm@19"].opt_include}"
-    ENV.append "CPPFLAGS", "-fno-sized-deallocation"
 
     jank_install_dir = OS.linux? ? libexec : bin
     inreplace "compiler+runtime/cmake/install.cmake",
