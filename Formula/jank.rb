@@ -1,9 +1,21 @@
 class Jank < Formula
   desc "Native Clojure dialect hosted on LLVM"
   homepage "https://jank-lang.org"
-  url "https://github.com/jank-lang/jank.git", branch: "main"
+  head "https://github.com/jank-lang/jank.git", branch: "main"
   version "0.1"
   license "MPL-2.0"
+
+  stable do
+    if OS.linux?
+      url "https://github.com/elken/jank/releases/download/latest/jank-linux-x86_64.tar.gz"
+    else
+      if Hardware::CPU.intel?
+        url "https://github.com/elken/jank/releases/download/latest/jank-darwin-x86_64.tar.gz"
+      else
+        url "https://github.com/elken/jank/releases/download/latest/jank-darwin-arm64.tar.gz"
+      end
+    end
+  end
 
   depends_on "cmake" => :build
   depends_on "git-lfs" => :build
@@ -16,32 +28,35 @@ class Jank < Formula
   depends_on "openssl"
 
   def install
-    ENV.prepend_path "PATH", Formula["llvm@19"].opt_bin
+    if build.head?
+      ENV.prepend_path "PATH", Formula["llvm@19"].opt_bin
 
-    ENV.append "LDFLAGS", "-Wl,-rpath,#{Formula["llvm@19"].opt_lib}"
+      ENV.append "LDFLAGS", "-Wl,-rpath,#{Formula["llvm@19"].opt_lib}"
 
-    ENV.append "CPPFLAGS", "-L#{Formula["llvm@19"].opt_include}"
-    ENV.append "CPPFLAGS", "-fno-sized-deallocation"
+      ENV.append "CPPFLAGS", "-L#{Formula["llvm@19"].opt_include}"
 
-    jank_install_dir = OS.linux? ? libexec : bin
-    inreplace "compiler+runtime/cmake/install.cmake",
-              '\\$ORIGIN',
-              jank_install_dir
+      jank_install_dir = OS.linux? ? libexec : bin
+      inreplace "compiler+runtime/cmake/install.cmake",
+                '\\$ORIGIN',
+                jank_install_dir
 
-    if OS.mac?
-      ENV["SDKROOT"] = MacOS.sdk_path
+      if OS.mac?
+        ENV["SDKROOT"] = MacOS.sdk_path
+      else
+        ENV["CC"] = Formula["llvm@19"].opt_bin/"clang"
+        ENV["CXX"] = Formula["llvm@19"].opt_bin/"clang++"
+      end
+
+      cd "compiler+runtime"
+
+      system "./bin/configure",
+             "-GNinja",
+             *std_cmake_args
+      system "./bin/compile"
+      system "./bin/install"
     else
-      ENV["CC"] = Formula["llvm@19"].opt_bin/"clang"
-      ENV["CXX"] = Formula["llvm@19"].opt_bin/"clang++"
+      prefix.install Dir["#{Dir["*"].first}/local/*"]
     end
-
-    cd "compiler+runtime"
-
-    system "./bin/configure",
-           "-GNinja",
-           *std_cmake_args
-    system "./bin/compile"
-    system "./bin/install"
   end
 
   test do
