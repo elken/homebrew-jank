@@ -30,6 +30,9 @@ git lfs install
 sudo ln -s "$(which git-lfs)" "$(git --exec-path)/git-lfs"
 ```
 
+By default the package pulls in from Jank's nightly releases, if you
+want to build the latest commit you can instead pass `--HEAD`.
+
 You can either:
 
 ```bash
