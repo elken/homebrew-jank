@@ -17,12 +17,12 @@ class Jank < Formula
     end
   end
 
-  depends_on "cmake" => :build
-  depends_on "git-lfs" => :build
-  depends_on "ninja" => :build
+  depends_on "cmake" => :build if build.head?
+  depends_on "git-lfs" => :build if build.head?
+  depends_on "ninja" => :build if build.head?
 
   depends_on "bdw-gc"
-  depends_on "boost"
+  depends_on "boost" if build.head?
   depends_on "libzip"
   depends_on "llvm@19"
   depends_on "openssl"
@@ -57,6 +57,19 @@ class Jank < Formula
     else
       prefix.install Dir["#{Dir["*"].first}/local/*"]
     end
+  end
+
+  def caveats
+    return if OS.mac?
+    <<~EOS
+      Brew on Linux doesn't setup LD_LIBRARY_PATH correctly, so if you
+      get errors about missing shared libraries you should add the
+      following to your shell init file.
+
+        export LD_LIBRARY_PATH="/home/linuxbrew/.linuxbrew/lib:$LD_LIBRARY_PATH"
+
+      and restart your shell.
+    EOS
   end
 
   test do
