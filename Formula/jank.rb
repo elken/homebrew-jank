@@ -1,7 +1,6 @@
 class Jank < Formula
   desc "Native Clojure dialect hosted on LLVM"
   homepage "https://jank-lang.org"
-  head "https://github.com/jank-lang/jank.git", branch: "main"
   version "0.1"
   license "MPL-2.0"
 
@@ -17,12 +16,16 @@ class Jank < Formula
     end
   end
 
-  depends_on "cmake" => :build if build.head?
-  depends_on "git-lfs" => :build if build.head?
-  depends_on "ninja" => :build if build.head?
+  head do
+    url "https://github.com/jank-lang/jank.git", branch: "main"
+
+    depends_on "cmake" => :build
+    depends_on "git-lfs" => :build
+    depends_on "ninja" => :build
+    depends_on "boost"
+  end
 
   depends_on "bdw-gc"
-  depends_on "boost" if build.head?
   depends_on "libzip"
   depends_on "llvm@19"
   depends_on "openssl"
